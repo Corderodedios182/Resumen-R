@@ -103,32 +103,99 @@ head(sign_prob)
 #Con esto podemos asegurar, la clasiicacion que estamos haciendo
 
 
+###############
+#Random Forest#
+###############
+library(rpart)
+
+smp_size <- floor(.75 * nrow(iris))
+
+set.seed(2018)
+train_ind <- sample(seq_len(nrow(iris)), size = smp_size)
+
+train <- iris[train_ind,]
+test <- iris[-train_ind,]
+
+####
+#80#
+####
+
+dim(train)
+
+example_0 <- iris[1,]
+example_1 <- iris[112,]
+
+loan_model <- rpart(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = train, method = "class", control = rpart.control(cp = 0))
+
+example_0
+predict(loan_model, example_0, type = "class")
+example_1
+predict(loan_model, example_1, type = "class")
+
+#par(mfrow=c(2,2))
+#summary(iris$Sepal.Width)
+#hist(train$Sepal.Width)
+#boxplot(train$Sepal.Width)
+#plot(train$Sepal.Width)
+rpart.plot(loan_model)
+
+train$predict <- predict(loan_model, train, type = "class")
+
+table(train$predict, train$Species)
+
+mean(train$predict == train$Species)
+
+########
+#Podado#
+########
+
+loan_model <- rpart(Species ~ Sepal.Width, data = train, method = "class", control = rpart.control(cp = 0, maxdepth = 1)) #Numero maxio de Ramas o Profuncidad del arbol
+rpart.plot(loan_model)
+train$predict <- predict(loan_model, train, type = "class")
+mean(train$predict == train$Species)
+
+loan_model <- rpart(Species ~ Sepal.Width, data = train, method = "class", control = rpart.control(cp = 0, minsplit = 20)) #Numero minimo de observaciones por Nodo
+rpart.plot(loan_model)
+train$predict <- predict(loan_model, train, type = "class")
+mean(train$predict == train$Species)
+
+###############
+#Podado Optimo#
+###############
+
+plotcp(loan_model)
+prune(loan_model, cp = 0)
+
+loan_model <- rpart(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = train, method = "class", control = rpart.control(cp = 0, maxdepth = 3)) #Numero maxio de Ramas o Profuncidad del arbol
+rpart.plot(loan_model)
+train$predict <- predict(loan_model, train, type = "class")
+mean(train$predict == train$Species)
 
 
+########
+#Forest#
+########
+
+library(randomForest)
+
+train <- train[,-6]
+
+loan_model <- randomForest(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = train) #Promedia los resultados
+train$predict <- predict(loan_model, train, type = "class")
+mean(train$predict == train$Species)
 
 
+####
+#20#
+####
 
+library(randomForest)
 
+train <- train[,-6]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+loan_model <- randomForest(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = train) #Promedia los resultados
+test$predict <- predict(loan_model, test, type = "class")
+mean(test$predict == test$Species)
 
 
 
