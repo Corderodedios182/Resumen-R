@@ -117,10 +117,14 @@ ggplot(emp_final, aes(x = status, fill = compa_level)) +
 library(Information)
 
 IV <- create_infotables(data = emp_final, y = "turnover")
-
-IV$Summary
-
-
+#Information value	Predictive power
+#< 0.15	Poor
+#Between 0.15 and 0.4	Moderate
+#> 0.4	Strong
+Information_value <- IV$Summary
+Information_value["IV_r"] <- round(Information_value$IV,3)
+Information_value <- Information_value %>% mutate(IV_predictive = ifelse(IV_r < .15,"Poor","Moderate"))
+Information_value <- Information_value %>% mutate(IV_predictive = ifelse(IV_r > .4,"Strong",IV_predictive))
 
 
 
